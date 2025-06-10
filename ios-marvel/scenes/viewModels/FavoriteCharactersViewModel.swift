@@ -12,7 +12,7 @@ protocol FavoriteCharactersViewModelDelegate: AnyObject {
     func didUpdateFavorites()
 }
 
-class FavoriteCharactersViewModel {
+final class FavoriteCharactersViewModel {
     private let favoriteService: FavoriteServiceProtocol
     weak var delegate: FavoriteCharactersViewModelDelegate?
     

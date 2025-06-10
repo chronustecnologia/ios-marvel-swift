@@ -7,9 +7,22 @@
 
 import UIKit
 
-class FavoritesViewController: UIViewController {
-    private let tableView = UITableView()
-    private let emptyStateView = EmptyStateView()
+final class FavoritesViewController: UIViewController {
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(FavoriteCell.self, forCellReuseIdentifier: FavoriteCell.reuseIdentifier)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.allowsSelectionDuringEditing = false
+        return tableView
+    }()
+    
+    private lazy var emptyStateView: EmptyStateView = {
+        let emptyStateView =  EmptyStateView()
+        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        return emptyStateView
+    }()
     
     private let viewModel = FavoriteCharactersViewModel()
     
@@ -27,11 +40,9 @@ class FavoritesViewController: UIViewController {
     }
     
     private func setupUI() {
-        title = "Favorites"
+        title = "Favoritos"
         view.backgroundColor = .systemBackground
         
-        // Empty State View
-        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(emptyStateView)
         
         NSLayoutConstraint.activate([
@@ -43,7 +54,6 @@ class FavoritesViewController: UIViewController {
     }
     
     private func setupTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -52,13 +62,6 @@ class FavoritesViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-        
-        tableView.register(FavoriteCell.self, forCellReuseIdentifier: FavoriteCell.reuseIdentifier)
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        // Enable swipe to delete
-        tableView.allowsSelectionDuringEditing = false
     }
     
     private func setupViewModel() {
@@ -68,8 +71,8 @@ class FavoritesViewController: UIViewController {
     private func showEmptyState() {
         emptyStateView.configure(
             image: UIImage(systemName: "star.slash"),
-            title: "No Favorites Yet",
-            message: "Add characters to your favorites and they will appear here",
+            title: "Nenhum favorito ainda",
+            message: "Adicione personagens aos seus favoritos e eles aparecerão aqui",
             buttonTitle: nil,
             action: nil
         )
@@ -124,7 +127,7 @@ extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "Remove"
+        return "Remover"
     }
 }
 

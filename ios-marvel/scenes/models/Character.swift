@@ -15,7 +15,14 @@ struct Character: Codable {
     let resourceURI: String
     
     var imageURL: URL? {
-        return URL(string: "\(thumbnail.path).\(thumbnail.extension)")
+        let urlString = "\(thumbnail.path).\(thumbnail.extension)"
+        
+        guard var components = URLComponents(string: urlString) else {
+            return nil
+        }
+        
+        components.scheme = "https"
+        return components.url
     }
 }
 
@@ -24,7 +31,6 @@ struct Thumbnail: Codable {
     let `extension`: String
 }
 
-// For persistence
 extension Character {
     func toData() -> Data? {
         return try? JSONEncoder().encode(self)
@@ -33,19 +39,4 @@ extension Character {
     static func fromData(_ data: Data) -> Character? {
         return try? JSONDecoder().decode(Character.self, from: data)
     }
-}
-
-// Models/DataResponse.swift
-struct CharacterDataWrapper: Decodable {
-    let code: Int
-    let status: String
-    let data: CharacterDataContainer
-}
-
-struct CharacterDataContainer: Decodable {
-    let offset: Int
-    let limit: Int
-    let total: Int
-    let count: Int
-    let results: [Character]
 }

@@ -7,11 +7,42 @@
 
 import UIKit
 
-class CharactersViewController: UIViewController {
-    private let tableView = UITableView()
-    private let searchController = UISearchController(searchResultsController: nil)
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
-    private let emptyStateView = EmptyStateView()
+final class CharactersViewController: UIViewController {
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(CharacterCell.self, forCellReuseIdentifier: CharacterCell.reuseIdentifier)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+
+        return tableView
+    }()
+    
+    private lazy var searchController: UISearchController = {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Pesquisar personagens"
+        return searchController
+    }()
+    
+    private lazy var activityIndicator: UIActivityIndicatorView = {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        return activityIndicator
+    }()
+    
+    private lazy var emptyStateView: EmptyStateView = {
+        let emptyStateView = EmptyStateView()
+        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        emptyStateView.isHidden = true
+        return emptyStateView
+    }()
     
     private let viewModel = CharacterListViewModel()
     
@@ -32,16 +63,10 @@ class CharactersViewController: UIViewController {
     }
     
     private func setupUI() {
-        title = "Marvel Characters"
+        title = "Personagens Marvel"
         view.backgroundColor = .systemBackground
         
-        // Activity Indicator
-        activityIndicator.center = view.center
-        activityIndicator.hidesWhenStopped = true
         view.addSubview(activityIndicator)
-        
-        // Empty State View
-        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(emptyStateView)
         
         NSLayoutConstraint.activate([
@@ -50,12 +75,9 @@ class CharactersViewController: UIViewController {
             emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
-        
-        emptyStateView.isHidden = true
     }
     
     private func setupTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -64,21 +86,9 @@ class CharactersViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-        
-        tableView.register(CharacterCell.self, forCellReuseIdentifier: CharacterCell.reuseIdentifier)
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        // Add pull to refresh
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        tableView.refreshControl = refreshControl
     }
     
     private func setupSearchController() {
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search Characters"
         navigationItem.searchController = searchController
         definesPresentationContext = true
     }
@@ -101,7 +111,7 @@ class CharactersViewController: UIViewController {
             image: UIImage(systemName: "exclamationmark.triangle"),
             title: "Oops!",
             message: message,
-            buttonTitle: "Try Again"
+            buttonTitle: "Tentar novamente"
         ) { [weak self] in
             self?.loadCharacters()
         }
@@ -113,8 +123,8 @@ class CharactersViewController: UIViewController {
     private func showEmptyState() {
         emptyStateView.configure(
             image: UIImage(systemName: "magnifyingglass"),
-            title: "No Characters Found",
-            message: "Try searching for something else",
+            title: "Personagens não encontrados",
+            message: "Tente procurar algo diferente",
             buttonTitle: nil,
             action: nil
         )
@@ -146,7 +156,6 @@ extension CharactersViewController: UITableViewDataSource, UITableViewDelegate {
             cell.updateFavoriteButton(isFavorite: self.viewModel.isFavorite(character.id))
         }
         
-        // Load more when reaching the end
         if indexPath.row == viewModel.numberOfCharacters - 5 && !viewModel.isLoading {
             viewModel.loadCharacters(loadMore: true)
         }
@@ -174,7 +183,6 @@ extension CharactersViewController: UISearchResultsUpdating {
             return
         }
         
-        // Add a short delay to avoid making an API call for each character typed
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(performSearch(_:)), object: nil)
         perform(#selector(performSearch(_:)), with: query, afterDelay: 0.5)
     }

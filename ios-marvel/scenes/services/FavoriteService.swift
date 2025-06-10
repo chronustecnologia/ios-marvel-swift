@@ -5,7 +5,6 @@
 //  Created by Jose Julio Junior on 10/06/25.
 //
 
-
 import Foundation
 
 protocol FavoriteServiceProtocol {
@@ -15,7 +14,7 @@ protocol FavoriteServiceProtocol {
     func isFavorite(_ characterId: Int) -> Bool
 }
 
-class FavoriteService: FavoriteServiceProtocol {
+final class FavoriteService: FavoriteServiceProtocol {
     private let userDefaults: UserDefaults
     private let favoritesKey = "FavoriteCharacters"
     
@@ -38,7 +37,6 @@ class FavoriteService: FavoriteServiceProtocol {
     func addToFavorites(_ character: Character) -> Bool {
         var favorites = getFavorites()
         
-        // Check if character is already in favorites
         if favorites.contains(where: { $0.id == character.id }) {
             return false
         }

@@ -7,22 +7,20 @@
 
 import UIKit
 
-class CharacterDetailViewController: UIViewController {
-    private let viewModel: CharacterDetailViewModel
-    
-    private let scrollView: UIScrollView = {
+final class CharacterDetailViewController: UIViewController {
+    private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
-    private let contentView: UIView = {
+    private lazy var contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
-    private let characterImageView: UIImageView = {
+    private lazy var characterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -30,7 +28,7 @@ class CharacterDetailViewController: UIViewController {
         return imageView
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 24, weight: .bold)
         label.numberOfLines = 0
@@ -39,13 +37,15 @@ class CharacterDetailViewController: UIViewController {
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
+    private lazy var descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16)
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    private let viewModel: CharacterDetailViewModel
     
     init(character: Character) {
         self.viewModel = CharacterDetailViewModel(character: character)
@@ -135,7 +135,6 @@ class CharacterDetailViewController: UIViewController {
     @objc private func favoriteButtonTapped() {
         _ = viewModel.toggleFavorite()
         
-        // Update icon
         let favoriteButton = UIBarButtonItem(
             image: viewModel.isFavorite ? UIImage(systemName: "star.fill") : UIImage(systemName: "star"),
             style: .plain,
@@ -157,6 +156,6 @@ class CharacterDetailViewController: UIViewController {
 
 extension CharacterDetailViewController: CharacterDetailViewModelDelegate {
     func didChangeFavoriteStatus() {
-        // Handled in favoriteButtonTapped
+        
     }
 }

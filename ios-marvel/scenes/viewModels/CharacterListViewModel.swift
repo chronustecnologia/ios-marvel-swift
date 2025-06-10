@@ -12,10 +12,13 @@ protocol CharacterListViewModelDelegate: AnyObject {
     func didEncounterError(_ error: NetworkError)
 }
 
-class CharacterListViewModel {
+final class CharacterListViewModel {
     private let characterService: CharacterServiceProtocol
     private let favoriteService: FavoriteServiceProtocol
+    
     weak var delegate: CharacterListViewModelDelegate?
+    
+    private let defaultOffset = 20
     
     var characters: [Character] = []
     var filteredCharacters: [Character] = []
@@ -41,7 +44,7 @@ class CharacterListViewModel {
         isLoading = true
         
         if loadMore {
-            currentOffset += 20
+            currentOffset += defaultOffset
         } else {
             currentOffset = 0
             characters = []
@@ -49,7 +52,7 @@ class CharacterListViewModel {
         
         characterService.fetchCharacters(
             offset: currentOffset,
-            limit: 20,
+            limit: defaultOffset,
             nameStartsWith: searchQuery.isEmpty ? nil : searchQuery
         ) { [weak self] result in
             guard let self = self else { return }

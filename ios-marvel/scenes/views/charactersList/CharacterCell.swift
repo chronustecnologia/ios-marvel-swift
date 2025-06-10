@@ -7,10 +7,10 @@
 
 import UIKit
 
-class CharacterCell: UITableViewCell {
+final class CharacterCell: UITableViewCell {
     static let reuseIdentifier = "CharacterCell"
     
-    private let characterImageView: UIImageView = {
+    private lazy var characterImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -19,14 +19,14 @@ class CharacterCell: UITableViewCell {
         return imageView
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let favoriteButton: UIButton = {
+    private lazy var favoriteButton: UIButton = {
         let button = UIButton(type: .system)
         button.tintColor = .systemYellow
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -41,7 +41,7 @@ class CharacterCell: UITableViewCell {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     private func setupViews() {

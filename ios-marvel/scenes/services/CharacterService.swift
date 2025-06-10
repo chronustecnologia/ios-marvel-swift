@@ -11,7 +11,7 @@ protocol CharacterServiceProtocol {
     func fetchCharacters(offset: Int, limit: Int, nameStartsWith: String?, completion: @escaping (Result<[Character], NetworkError>) -> Void)
 }
 
-class CharacterService: CharacterServiceProtocol {
+final class CharacterService: CharacterServiceProtocol {
     private let apiClient: APIClient
     
     init(apiClient: APIClient = APIClient()) {
