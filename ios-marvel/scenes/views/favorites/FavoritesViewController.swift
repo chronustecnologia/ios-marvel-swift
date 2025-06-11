@@ -134,7 +134,8 @@ extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
 extension FavoritesViewController: FavoriteCharactersViewModelDelegate {
     func didUpdateFavorites() {
         DispatchQueue.main.async { [weak self] in
-            self?.updateUI()
+            guard let self else { return }
+            self.updateUI()
         }
     }
 }

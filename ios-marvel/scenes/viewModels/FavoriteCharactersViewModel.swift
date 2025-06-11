@@ -5,7 +5,6 @@
 //  Created by Jose Julio Junior on 10/06/25.
 //
 
-
 import Foundation
 
 protocol FavoriteCharactersViewModelDelegate: AnyObject {
@@ -14,6 +13,7 @@ protocol FavoriteCharactersViewModelDelegate: AnyObject {
 
 final class FavoriteCharactersViewModel {
     private let favoriteService: FavoriteServiceProtocol
+    
     weak var delegate: FavoriteCharactersViewModelDelegate?
     
     var favoriteCharacters: [Character] = []

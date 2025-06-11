@@ -15,6 +15,7 @@ protocol CharacterDetailViewModelDelegate: AnyObject {
 final class CharacterDetailViewModel {
     private let favoriteService: FavoriteServiceProtocol
     let character: Character
+    
     weak var delegate: CharacterDetailViewModelDelegate?
     
     init(character: Character, favoriteService: FavoriteServiceProtocol = FavoriteService()) {
@@ -27,7 +28,7 @@ final class CharacterDetailViewModel {
     }
     
     var description: String {
-        return character.description.isEmpty ? "No description available" : character.description
+        return character.description.isEmpty ? "Nenhuma descrição disponível" : character.description
     }
     
     var imageURL: URL? {
@@ -51,7 +52,7 @@ final class CharacterDetailViewModel {
     }
     
     func shareImage(image: UIImage, from viewController: UIViewController) {
-        let items: [Any] = [image, "Check out this Marvel character: \(character.name)"]
+        let items: [Any] = [image, "Confira este personagem da Marvel: \(character.name)"]
         let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
         
         viewController.present(activityViewController, animated: true)

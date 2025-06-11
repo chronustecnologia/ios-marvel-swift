@@ -14,7 +14,7 @@ struct MarvelAPI {
     private static let privateKey = "6b43ed0206d255a4981f7ec2937f20ce66482ad5"
     
     static func charactersEndpoint(offset: Int = 0, limit: Int = 20, nameStartsWith: String? = nil) -> URL? {
-        let timestamp = String(Date().timeIntervalSince1970)
+        let timestamp = String(Int(Date().timeIntervalSince1970))
         let hash = generateHash(timestamp: timestamp)
         
         var components = URLComponents(string: "\(baseURL)/characters")

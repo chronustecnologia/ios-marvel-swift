@@ -10,18 +10,7 @@ import XCTest
 @testable import ios_marvel
 
 class CharacterServiceTests: XCTestCase {
-    
-    class MockAPIClient: APIClient {
-        var mockResult: Result<CharacterDataWrapper, NetworkError>?
         
-        override func fetch<T>(url: URL?, completion: @escaping (Result<T, NetworkError>) -> Void) where T : Decodable {
-            guard let mockResult = mockResult as? Result<T, NetworkError> else {
-                fatalError("Mock result not set")
-            }
-            completion(mockResult)
-        }
-    }
-    
     var mockAPIClient: MockAPIClient!
     var service: CharacterService!
     
@@ -91,8 +80,15 @@ class CharacterServiceTests: XCTestCase {
             case .success:
                 XCTFail("Expected failure but got success")
             case .failure(let error):
-                //XCTAssertEqual(error, expectedError)
-                break
+                switch (error, expectedError) {
+                case (.invalidURL, .invalidURL),
+                     (.noData, .noData),
+                     (.decodingError, .decodingError),
+                     (.noInternet, .noInternet):
+                    break
+                default:
+                    XCTFail("Got error \(error), but expected \(expectedError)")
+                }
             }
             
             expectation.fulfill()

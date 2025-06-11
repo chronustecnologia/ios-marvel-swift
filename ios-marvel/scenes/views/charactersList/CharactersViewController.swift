@@ -25,6 +25,7 @@ final class CharactersViewController: UIViewController {
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
+        searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Pesquisar personagens"
         return searchController
@@ -45,6 +46,8 @@ final class CharactersViewController: UIViewController {
     }()
     
     private let viewModel = CharacterListViewModel()
+    
+    private let searchDebounceInterval: TimeInterval = 0.5
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -156,9 +159,9 @@ extension CharactersViewController: UITableViewDataSource, UITableViewDelegate {
             cell.updateFavoriteButton(isFavorite: self.viewModel.isFavorite(character.id))
         }
         
-        if indexPath.row == viewModel.numberOfCharacters - 5 && !viewModel.isLoading {
-            viewModel.loadCharacters(loadMore: true)
-        }
+        //if indexPath.row == viewModel.numberOfCharacters - 5 && !viewModel.isLoading {
+        //    viewModel.loadCharacters(loadMore: true)
+        //}
         
         return cell
     }
@@ -176,19 +179,31 @@ extension CharactersViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension CharactersViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        guard let query = searchController.searchBar.text, !query.isEmpty else {
-            viewModel.searchQuery = ""
-            return
-        }
+extension CharactersViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
         
-        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(performSearch(_:)), object: nil)
-        perform(#selector(performSearch(_:)), with: query, afterDelay: 0.5)
+        // Calculate when we're near bottom (e.g., within 200 points of the bottom)
+        let distanceFromBottom = contentHeight - position - scrollViewHeight
+        let threshold: CGFloat = 200.0
+        
+        // If we're close to the bottom and not already loading
+        if distanceFromBottom < threshold && !viewModel.isLoading && contentHeight > 0 {
+            viewModel.loadCharacters(loadMore: true)
+        }
+    }
+}
+
+extension CharactersViewController: UISearchResultsUpdating, UISearchBarDelegate {
+    func updateSearchResults(for searchController: UISearchController) {
+        let query = searchController.searchBar.text ?? ""
+        viewModel.searchQuery = query
     }
     
-    @objc private func performSearch(_ query: String) {
-        viewModel.searchQuery = query
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        viewModel.searchQuery = ""
     }
 }
 

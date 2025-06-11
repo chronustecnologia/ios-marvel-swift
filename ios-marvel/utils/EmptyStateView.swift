@@ -8,10 +8,38 @@
 import UIKit
 
 class EmptyStateView: UIView {
-    private let imageView = UIImageView()
-    private let titleLabel = UILabel()
-    private let messageLabel = UILabel()
-    private let actionButton = UIButton(type: .system)
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .gray
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private lazy var titleLabel: UILabel = {
+        let titleLabel = UILabel()
+        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        return titleLabel
+    }()
+    
+    private lazy var messageLabel: UILabel = {
+        let messageLabel = UILabel()
+        messageLabel.font = UIFont.systemFont(ofSize: 16)
+        messageLabel.textAlignment = .center
+        messageLabel.numberOfLines = 0
+        messageLabel.textColor = .gray
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        return messageLabel
+    }()
+    
+    private lazy var actionButton: UIButton = {
+        let actionButton = UIButton(type: .system)
+        actionButton.translatesAutoresizingMaskIntoConstraints = false
+        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        return actionButton
+    }()
     
     private var buttonAction: (() -> Void)?
     
@@ -26,23 +54,6 @@ class EmptyStateView: UIView {
     }
     
     private func setupViews() {
-        imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .gray
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        titleLabel.textAlignment = .center
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        messageLabel.font = UIFont.systemFont(ofSize: 16)
-        messageLabel.textAlignment = .center
-        messageLabel.numberOfLines = 0
-        messageLabel.textColor = .gray
-        messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        actionButton.translatesAutoresizingMaskIntoConstraints = false
-        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-        
         addSubview(imageView)
         addSubview(titleLabel)
         addSubview(messageLabel)

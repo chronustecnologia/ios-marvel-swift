@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 protocol CharacterListViewModelDelegate: AnyObject {
     func didUpdateCharacters()
@@ -20,24 +21,29 @@ final class CharacterListViewModel {
     
     private let defaultOffset = 20
     
+    private var searchSubject = CurrentValueSubject<String, Never>("")
+    private var cancellables = Set<AnyCancellable>()
+    
     var characters: [Character] = []
     var filteredCharacters: [Character] = []
     var isLoading = false
     var currentOffset = 0
-    var searchQuery: String = "" {
-        didSet {
-            searchCharacters()
-        }
+    var hasMoreData = true
+    
+    var searchQuery: String {
+        get { searchSubject.value }
+        set { searchSubject.send(newValue) }
     }
     
     init(characterService: CharacterServiceProtocol = CharacterService(),
          favoriteService: FavoriteServiceProtocol = FavoriteService()) {
         self.characterService = characterService
         self.favoriteService = favoriteService
+        self.setupBindings()
     }
     
     func loadCharacters(loadMore: Bool = false) {
-        if isLoading {
+        if isLoading || (loadMore && !hasMoreData) {
             return
         }
         
@@ -48,12 +54,15 @@ final class CharacterListViewModel {
         } else {
             currentOffset = 0
             characters = []
+            hasMoreData = true
         }
+        
+        let searchParam = searchQuery.isEmpty ? nil : searchQuery
         
         characterService.fetchCharacters(
             offset: currentOffset,
             limit: defaultOffset,
-            nameStartsWith: searchQuery.isEmpty ? nil : searchQuery
+            nameStartsWith: searchParam
         ) { [weak self] result in
             guard let self = self else { return }
             
@@ -61,11 +70,17 @@ final class CharacterListViewModel {
             
             switch result {
             case .success(let newCharacters):
+                if newCharacters.isEmpty {
+                    self.hasMoreData = false
+                    return
+                }
+                
                 if loadMore {
                     self.characters.append(contentsOf: newCharacters)
                 } else {
                     self.characters = newCharacters
                 }
+                
                 self.filteredCharacters = self.characters
                 self.delegate?.didUpdateCharacters()
                 
@@ -75,17 +90,21 @@ final class CharacterListViewModel {
         }
     }
     
-    func searchCharacters() {
-        guard !searchQuery.isEmpty else {
-            filteredCharacters = characters
-            delegate?.didUpdateCharacters()
-            return
-        }
-        
-        currentOffset = 0
-        loadCharacters()
+    private func setupBindings() {
+        searchSubject
+            .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] query in
+                guard let self = self else { return }
+                
+                self.currentOffset = 0
+                if self.isLoading { return }
+                
+                self.loadCharacters()
+            }
+            .store(in: &cancellables)
     }
-    
+
     func isFavorite(_ characterId: Int) -> Bool {
         return favoriteService.isFavorite(characterId)
     }

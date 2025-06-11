@@ -11,18 +11,6 @@ import XCTest
 
 class FavoriteServiceTests: XCTestCase {
     
-    class MockUserDefaults: UserDefaults {
-        var mockStore: [String: Any] = [:]
-        
-        override func data(forKey defaultName: String) -> Data? {
-            return mockStore[defaultName] as? Data
-        }
-        
-        override func set(_ value: Any?, forKey key: String) {
-            mockStore[key] = value
-        }
-    }
-    
     var mockUserDefaults: MockUserDefaults!
     var service: FavoriteService!
     var testCharacter: Character!
@@ -74,7 +62,7 @@ class FavoriteServiceTests: XCTestCase {
         let result = service.addToFavorites(testCharacter)
         
         // Then
-        XCTAssertFalse(result) // Should fail to add duplicate
+        XCTAssertFalse(result) 
         XCTAssertEqual(service.getFavorites().count, 1)
     }
     
@@ -92,7 +80,7 @@ class FavoriteServiceTests: XCTestCase {
     
     func testRemoveFromFavorites_NotFound() {
         // When
-        let result = service.removeFromFavorites(999) // Non-existent character
+        let result = service.removeFromFavorites(999)
         
         // Then
         XCTAssertFalse(result)
@@ -104,6 +92,6 @@ class FavoriteServiceTests: XCTestCase {
         
         // When & Then
         XCTAssertTrue(service.isFavorite(testCharacter.id))
-        XCTAssertFalse(service.isFavorite(999)) // Non-existent character
+        XCTAssertFalse(service.isFavorite(999))
     }
 }
