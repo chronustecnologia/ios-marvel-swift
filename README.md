@@ -1,52 +1,77 @@
-# Marvel Characters App
+# Aplicativo de Personagens da Marvel
 
-An iOS application that displays Marvel characters, allows viewing character details, and managing favorites.
+Um aplicativo iOS que exibe personagens da Marvel, permite visualizar detalhes dos personagens e gerenciar favoritos.
 
-## Features
+## Funcionalidades
 
-- Browse Marvel characters with infinite scrolling
-- Search characters by name
-- View detailed character information
-- Save favorite characters for offline viewing
-- Share character images
+- Navegar por personagens da Marvel com rolagem infinita
+- Buscar personagens por nome
+- Visualizar informações detalhadas dos personagens
+- Salvar personagens favoritos para visualização offline
+- Compartilhar imagens de personagens
 
-## Architecture
+## Arquitetura
 
-The app follows the MVVM (Model-View-ViewModel) architecture pattern:
+O aplicativo segue o padrão de arquitetura MVVM (Model-View-ViewModel):
 
-- **Models**: Data structures representing characters and API responses
-- **Views**: UIKit elements for displaying the UI
-- **ViewModels**: Business logic layer that connects models and views
-- **Services**: Handle API communication and local data persistence
+- **Models**: Estruturas de dados que representam personagens e respostas da API
+- **Views**: Elementos UIKit para exibir a UI
+- **ViewModels**: Camada de lógica de negócios que conecta modelos e visões
+- **Services**: Lida com a comunicação da API e a persistência de dados local
 
-## Technologies Used
+## Tecnologias Utilizadas
 
 - Swift 5.0+
 - UIKit
-- URLSession for networking
-- UserDefaults for data persistence
-- XCTest for unit testing
+- URLSession para comunicação de rede
+- UserDefaults para persistência de dados
+- XCTest para testes unitários
 
-## Key Components
+## Componentes Chave
 
-### Network Layer
-- `APIClient`: Generic network client for making API requests
-- `MarvelAPI`: Endpoints and authentication for the Marvel API
+### Camada de Rede
+- `APIClient`: Cliente de rede genérico para fazer requisições à API
+- `MarvelAPI`: Endpoints e autenticação para a API da Marvel
 
-### Data Persistence
-- `FavoriteService`: Manages saving and retrieving favorite characters using UserDefaults
+### Persistência de Dados
+- `FavoriteService`: Gerencia o salvamento e a recuperação de personagens favoritos usando UserDefaults
 
-### UI Components
-- Tab-based interface with Characters and Favorites tabs
-- Search functionality for filtering characters
-- Pull-to-refresh for updating content
-- Empty states for no content, errors, and offline mode
+### Componentes de UI
+- Interface baseada em abas com as abas Personagens e Favoritos
+- Funcionalidade de busca para filtrar personagens
+- Pull-to-refresh para atualizar conteúdo
+- Estados vazios para ausência de conteúdo, erros e modo offline
 
-## Setup Instructions
+### Funcionalidade de Busca Otimizada
 
-1. Clone the repository
-2. Open `MarvelApp.xcodeproj` in Xcode
-3. Add your Marvel API keys in `MarvelAPI.swift`:
+Para a funcionalidade de pesquisa de personagens, o seguinte código foi utilizado:
+
+```swift
+private func setupBindings() {
+    searchSubject
+        .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
+        .removeDuplicates()
+        .sink { [weak self] query in
+            guard let self = self else { return }
+            
+            self.currentOffset = 0
+            if self.isLoading { return }
+            
+            self.loadCharacters()
+        }
+        .store(in: &cancellables)
+}
+````
+
+A inclusão deste trecho de código é crucial para otimizar a experiência de pesquisa do usuário. A utilização de `debounce(for: .seconds(0.5)`, `scheduler: RunLoop.main)` garante que a pesquisa só seja acionada após 0.5 segundos de inatividade do usuário digitando, evitando requisições desnecessárias à API a cada caractere digitado. Isso melhora significativamente a performance e reduz o consumo de dados e recursos do servidor.
+
+Além disso, `.removeDuplicates()` assegura que, se o usuário digitar e apagar o mesmo texto rapidamente, ou digitar o mesmo termo duas vezes seguidas, a pesquisa não será refeita desnecessariamente, otimizando ainda mais o desempenho. Quando uma nova consulta é confirmada, o currentOffset é resetado para 0 para que a pesquisa comece do início, e `loadCharacters()` é chamado para buscar os resultados.
+
+## Instruções de Configuração
+
+1. Clone o repositório
+2. Abra MarvelApp.xcodeproj no Xcode
+3. Adicione suas chaves da API da Marvel em `MarvelAPI.swift`:
    ```swift
    private static let publicKey = "YOUR_PUBLIC_KEY"
    private static let privateKey = "YOUR_PRIVATE_KEY"
